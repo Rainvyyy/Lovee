@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Untuk {{ recipient }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="mascot-cat-shape">
+      <path d="M20 26 L10 6 L34 20 Z" />
+      <path d="M60 26 L70 6 L46 20 Z" />
+      <ellipse cx="40" cy="42" rx="30" ry="24" />
+      <circle cx="29" cy="40" r="3.4" fill="var(--wine-black)" stroke="none"/>
+      <circle cx="51" cy="40" r="3.4" fill="var(--wine-black)" stroke="none"/>
+      <circle cx="20" cy="48" r="4" fill="var(--blush-cheek, #ffc9c9)" stroke="none" opacity="0.8"/>
+      <circle cx="60" cy="48" r="4" fill="var(--blush-cheek, #ffc9c9)" stroke="none" opacity="0.8"/>
+      <path d="M34 50 Q40 56 46 50" fill="none" stroke-width="2.4" stroke-linecap="round"/>
+    </g>
+    <g id="icon-heart-shape">
+      <path d="M50 88 C 20 65, 5 45, 5 27 C 5 10, 20 2, 32 8 C 42 13, 47 22, 50 30 C 53 22, 58 13, 68 8 C 80 2, 95 10, 95 27 C 95 45, 80 65, 50 88 Z"/>
+    </g>
+    <g id="icon-bouquet-shape">
+      <path d="M50 95 L46 55 L54 55 Z"/>
+      <circle cx="50" cy="34" r="16"/>
+      <circle cx="30" cy="46" r="13"/>
+      <circle cx="70" cy="46" r="13"/>
+      <circle cx="50" cy="55" r="6" fill="var(--glow-gold)" stroke="none"/>
+    </g>
+    <g id="icon-music-shape">
+      <circle cx="20" cy="72" r="12"/>
+      <circle cx="62" cy="64" r="12"/>
+      <path d="M32 72 V24 L74 14 V64" fill="none" stroke-width="5"/>
+    </g>
+    <g id="icon-camera-shape" fill="none" stroke-width="5">
+      <rect x="8" y="26" width="64" height="42" rx="6"/>
+      <path d="M26 26 L32 14 H48 L54 26"/>
+      <circle cx="40" cy="47" r="13"/>
+    </g>
+  </defs>
+</svg>
+
+<div class="grain-overlay"></div>
+<canvas id="particle-canvas"></canvas>
+
+<!-- STAGE 1: LOADING -->
+<section id="stage-loading" class="stage stage--active">
+  <div class="loading-wrap">
+    <div class="loading-emblem">
+      <svg viewBox="0 0 100 100" class="loading-heart">
+        <path d="M50 88 C 20 65, 5 45, 5 27 C 5 10, 20 2, 32 8 C 42 13, 47 22, 50 30 C 53 22, 58 13, 68 8 C 80 2, 95 10, 95 27 C 95 45, 80 65, 50 88 Z"/>
+      </svg>
+    </div>
+    <p class="loading-label">Menyiapkan sesuatu yang istimewa</p>
+    <div class="loading-bar-track">
+      <div class="loading-bar-fill" id="loading-bar-fill"></div>
+    </div>
+    <p class="loading-percent" id="loading-percent">0%</p>
+  </div>
+</section>
+
+<!-- STAGE 2: PASSWORD -->
+<section id="stage-password" class="stage">
+  <div class="corner-deco corner-deco--tl"></div>
+  <div class="corner-deco corner-deco--br"></div>
+  <div class="password-wrap">
+    <span class="eyebrow">Ruang Pribadi</span>
+    <h1 class="password-title">Masukkan Kode Rahasia Kita</h1>
+    <p class="password-sub">Sesuatu yang hanya kita berdua tahu.</p>
+    <div class="password-dots" id="password-dots">
+  <span class="dot"></span><span class="dot"></span>
+  <span class="dot"></span><span class="dot"></span>
+</div>
+    <div class="password-error" id="password-error">
+      <span class="password-error-text">Kode belum tepat, coba lagi.</span>
+    </div>
+    <div class="keypad" id="keypad">
+      <button class="key" data-key="1">1</button>
+      <button class="key" data-key="2">2</button>
+      <button class="key" data-key="3">3</button>
+      <button class="key" data-key="4">4</button>
+      <button class="key" data-key="5">5</button>
+      <button class="key" data-key="6">6</button>
+      <button class="key" data-key="7">7</button>
+      <button class="key" data-key="8">8</button>
+      <button class="key" data-key="9">9</button>
+      <button class="key key--action" data-key="back">&#8592;</button>
+      <button class="key" data-key="0">0</button>
+      <button class="key key--action key--confirm" data-key="ok">&#10003;</button>
+    </div>
+  </div>
+</section>
+
+<!-- PASSWORD WRONG POPUP -->
+<div class="password-modal-overlay" id="password-modal-overlay">
+  <div class="password-modal-card">
+    <span class="mascot-cat mascot-cat--modal mascot-cat--left" aria-hidden="true">
+      <svg viewBox="0 0 80 70"><use href="#mascot-cat-shape"></use></svg>
+    </span>
+    <span class="mascot-cat mascot-cat--modal mascot-cat--right" aria-hidden="true">
+      <svg viewBox="0 0 80 70"><use href="#mascot-cat-shape"></use></svg>
+    </span>
+    <h3 class="password-modal-title">Kode Salah!</h3>
+    <p class="password-modal-clue">Clue: <span id="password-modal-clue-text">Coba lagi.</span></p>
+    <button class="password-modal-btn" id="password-modal-btn">Coba Lagi</button>
+  </div>
+</div>
+
+<!-- STAGE 3: GIFT -->
+<section id="stage-gift" class="stage">
+  <div class="paper-plane paper-plane--left" aria-hidden="true">&#9993;</div>
+  <div class="paper-plane paper-plane--right" aria-hidden="true">&#9993;</div>
+  <div class="gift-wrap">
+    <span class="mascot-cat mascot-cat--lg">
+      <svg viewBox="0 0 80 70"><use href="#mascot-cat-shape"></use></svg>
+    </span>
+    <h1 class="gift-title">Kamu menemukan kunci<br>yang tepat menuju hatiku &lt;3</h1>
+    <button class="btn-open" id="btn-open-gift">Buka Kejutan</button>
+  </div>
+</section>
+
+<!-- STAGE 4: ENVELOPE -->
+<section id="stage-envelope" class="stage">
+  <div class="envelope-wrap">
+    <span class="eyebrow">Ketuk untuk membuka</span>
+    <div class="envelope" id="envelope">
+      <div class="envelope-paper" id="envelope-paper">
+        <div class="paper-line"></div>
+        <div class="paper-line"></div>
+        <div class="paper-line short"></div>
+      </div>
+      <div class="envelope-back"></div>
+      <div class="envelope-flap-left"></div>
+      <div class="envelope-flap-right"></div>
+      <div class="envelope-flap-top" id="envelope-flap-top"></div>
+      <div class="wax-seal" id="wax-seal">
+        <svg viewBox="0 0 40 40"><path d="M20 6 C 10 6, 4 14, 4 20 C 4 28, 12 34, 20 34 C 28 34, 36 28, 36 20 C 36 14, 30 6, 20 6 Z"/></svg>
+      </div>
+      <div class="envelope-front"></div>
+    </div>
+  </div>
+</section>
+
+<!-- STAGE 5: LETTER -->
+<section id="stage-letter" class="stage">
+  <div class="letter-scene">
+    <div class="letter-sheet-behind letter-sheet-behind--2"></div>
+    <div class="letter-sheet-behind letter-sheet-behind--1"></div>
+    <div class="letter-sheet">
+      <p class="letter-date" id="letter-date"></p>
+      <h2 class="letter-heading" id="letter-heading"></h2>
+      <p class="letter-subtitle" id="letter-subtitle"></p>
+      <div class="letter-body" id="letter-body"></div>
+      <p class="letter-closing" id="letter-closing"></p>
+      <p class="letter-signature" id="letter-signature"></p>
+      <button class="btn-continue" id="btn-after-letter">Lanjutkan &rarr;</button>
+    </div>
+  </div>
+</section>
+
+<!-- STAGE HUB -->
+<section id="stage-hub" class="stage">
+  <div class="corner-deco corner-deco--tl"></div>
+  <div class="corner-deco corner-deco--br"></div>
+  <div class="hub-wrap">
+    <span class="eyebrow">Masih Ada yang Menunggu</span>
+    <h2 class="hub-title">Buka Satu per Satu, ya?</h2>
+    <div class="hub-cards" id="hub-cards">
+      <button class="hub-card" data-target="stage-gallery" data-key="gallery">
+        <span class="hub-card-icon"><svg viewBox="0 0 100 100"><use href="#icon-heart-shape"></use></svg></span>
+        <span class="hub-card-label">Kenangan</span>
+        <span class="hub-card-check" aria-hidden="true">&#10003;</span>
+      </button>
+      <button class="hub-card" data-target="stage-flower" data-key="flower">
+        <span class="hub-card-icon"><svg viewBox="0 0 100 100"><use href="#icon-bouquet-shape"></use></svg></span>
+        <span class="hub-card-label">Bunga</span>
+        <span class="hub-card-check" aria-hidden="true">&#10003;</span>
+      </button>
+      <button class="hub-card" data-target="stage-music" data-key="music">
+        <span class="hub-card-icon"><svg viewBox="0 0 100 100"><use href="#icon-music-shape"></use></svg></span>
+        <span class="hub-card-label">Musik</span>
+        <span class="hub-card-check" aria-hidden="true">&#10003;</span>
+      </button>
+    </div>
+    <button class="btn-continue" id="btn-after-hub" disabled>Lanjutkan &rarr;</button>
+  </div>
+</section>
+
+<!-- STAGE 6: GALLERY -->
+<section id="stage-gallery" class="stage">
+  <button class="btn-back" data-back-to="stage-hub">&larr; Kembali</button>
+  <div class="gallery-wrap">
+
+    <!-- ============================================================
+         LAPISAN DEKORASI SCRAPBOOK
+         Cara menambah/mengganti ilustrasi lucu di sini ada di
+         TUTORIAL_DEKORASI.md dan komentar "TUTORIAL DEKORASI"
+         di style.css (cari bagian GALLERY — SCRAPBOOK).
+         Tiap <span class="deco ..."> = satu stiker yang posisinya
+         diatur lewat class deco--1, deco--2, dst di CSS.
+         ============================================================ -->
+    <div class="scrapbook-deco" aria-hidden="true">
+      <span class="deco deco--star deco--1">✦</span>
+      <span class="deco deco--snow deco--2">❄</span>
+      <span class="deco deco--heart deco--3"><svg viewBox="0 0 100 100"><use href="#icon-heart-shape"></use></svg></span>
+      <span class="deco deco--star deco--4">✧</span>
+      <span class="deco deco--snow deco--5">❄</span>
+      <span class="deco deco--sparkle deco--6">✦</span>
+      <span class="deco deco--heart deco--7"><svg viewBox="0 0 100 100"><use href="#icon-heart-shape"></use></svg></span>
+      <span class="deco deco--star deco--8">✧</span>
+    </div>
+
+    <div class="gallery-header">
+      <span class="eyebrow">Sepenggal Kenangan</span>
+      <h2 class="gallery-title-script">Kenangan Kita</h2>
+    </div>
+
+    <div class="gallery-layout">
+      <div class="gallery-collage" id="gallery-grid">
+        <!-- foto + kartu kutipan disisipkan otomatis oleh script.js -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STAGE 7: FLOWER -->
+<section id="stage-flower" class="stage">
+  <button class="btn-back" data-back-to="stage-hub">&larr; Kembali</button>
+  <div class="flower-scene">
+    <div class="flower-text">
+      <span class="flower-title-prefix" id="flower-title-prefix"></span>
+      <h2 class="flower-title-script" id="flower-title-script"></h2>
+      <p class="flower-description" id="flower-description"></p>
+      <p class="flower-love">Just for you ❤️</p>
+    </div>
+    <div class="flower-image-wrap">
+      <span class="flower-sparkle" aria-hidden="true">&#10022;</span>
+      <div class="image-slot flower-image-slot">
+        <img src="{{ url_for('static', filename='images/bouquet.png') }}" alt="Buket bunga" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="image-slot-placeholder">bouquet.png</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STAGE 8: MUSIC -->
+<section id="stage-music" class="stage">
+  <button class="btn-back" data-back-to="stage-hub">&larr; Kembali</button>
+  <div class="music-scene">
+    <div class="music-player-card">
+      <div class="music-player-cover">
+        <img id="music-hero-cover" src="{{ url_for('static', filename='images/album-cover.jpg') }}" alt="Cover" onerror="this.style.display='none'">
+        <div class="music-player-overlay">
+          <button class="music-play-btn" id="music-play-btn">▶</button>
+        </div>
+      </div>
+      <div class="music-player-info">
+        <div class="music-player-label" id="music-hero-label">Kamu!</div>
+        <div class="music-player-artist" id="music-hero-artist">Lagu untuk kita berdua</div>
+        <div class="music-player-progress">
+          <span class="music-progress-time" id="music-current-time">0:00</span>
+          <div class="music-progress-bar" id="music-progress-bar">
+            <div class="music-progress-fill" id="music-progress-fill"></div>
+          </div>
+          <span class="music-progress-time" id="music-duration">0:00</span>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="music-playlist-heading">Sepenggal Momen</h3>
+    <div class="music-photos" id="music-photos"></div>
+  </div>
+</section>
+
+<!-- STAGE 9: ENDING -->
+<section id="stage-ending" class="stage">
+  <div class="ending-wrap">
+    <div class="ending-heart">
+      <svg viewBox="0 0 100 100"><path d="M50 88 C 20 65, 5 45, 5 27 C 5 10, 20 2, 32 8 C 42 13, 47 22, 50 30 C 53 22, 58 13, 68 8 C 80 2, 95 10, 95 27 C 95 45, 80 65, 50 88 Z"/></svg>
+    </div>
+    <h1 class="ending-headline" id="ending-headline"></h1>
+    <p class="ending-subline" id="ending-subline"></p>
+    <button class="btn-replay" id="btn-replay">Putar Ulang</button>
+  </div>
+</section>
+
+<script id="letter-data" type="application/json">{{ letter_data | safe }}</script>
+<audio id="bg-music" src="{{ url_for('static', filename='audio/music.mp3') }}" loop preload="none"></audio>
+
+<script src="{{ url_for('static', filename='js/particles.js') }}"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
